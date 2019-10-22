@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import { LineChart } from 'react-native-svg-charts'
 import * as shape from 'd3-shape'
 import Tts from 'react-native-tts'
 import Voice from 'react-native-voice'
 import  { BleManager } from 'react-native-ble-plx';
-
+import BluetoothSerial, {
+  withSubscription
+} from "react-native-bluetooth-serial-next";
 import Text from '../../components/Text'
 import { Container, HomeHeader, TemperatureContainer, Temperature, Chart, Panel, Button, Row } from './styles'
 
@@ -17,20 +19,44 @@ export default function Home(){
         console.log('OnSpeechStart: ', e)
     }
 
+    const discoverUnpairedDevices = async () => {
+        const unpairedDevices = await BluetoothSerial.listUnpaired();
+        console.log(unpairedDevices);
+    }
+
+    useEffect(() => {
+      const check = async() => {
+        try {
+        const [isEnabled, devices] = await Promise.all([
+          BluetoothSerial.isEnabled(),
+          BluetoothSerial.list()
+        ]);
+        console.log(devices);
+      }
+      catch (e) {
+        alert(e);
+      }
+      }
+      check();
+    }, [])
+  
+
     const scanDevices = () => {
       
-      manager.startDeviceScan(null, null, (error, device) => {
-        if(error) return null;
-        console.warn(device);
-        if (device && (device.name === 'TI BLE Sensor Tag' || 
-            device.name === 'SensorTag')) {
-            
-            // Stop scanning as it's not necessary if you are scanning for one device.
-            manager.stopDeviceScan();
+      // return manager.startDeviceScan(null, null, (error, device) => {
+      //   if(error) return null;
+        
+      //   if (device.name !== null) {
+      //       console.log(device.name)
+      //       // Stop scanning as it's not necessary if you are scanning for one device.
+      //       // manager.stopDeviceScan();
 
-            // Proceed with connection.
-        }
-      })
+      //       // Proceed with connection.
+      //   }
+      //   else {
+      //     // console.warn("Scanning")
+      //   }
+      // })     
     }
 
     return(
@@ -70,7 +96,7 @@ export default function Home(){
                     </Button>
                 </Row>
                 <Row>
-                    <Button onPress={() => scanDevices()}>
+                    <Button onPress={() => discoverUnpairedDevices()}>
                         <Text color={DEFAULT_COLOR}>Temperatura</Text>
                         <Icon name="wb-sunny" size={28} color={DEFAULT_COLOR} />
                     </Button>

@@ -8,14 +8,15 @@
 
 import React from 'react';
 import Routes from './src/configs/routes';
-import { StatusBar } from 'react-native';
+import {StatusBar} from 'react-native';
+import {Root} from 'native-base';
 
 const App: React.FC = () => {
   return (
-    <>
-    <StatusBar backgroundColor="#f7f9fa" barStyle="dark-content"/>
-    <Routes/>
-    </>
+    <Root>
+      <StatusBar backgroundColor="#f7f9fa" barStyle="dark-content" />
+      <Routes />
+    </Root>
   );
 };
 

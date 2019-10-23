@@ -9,14 +9,9 @@ module.exports = {
       "project": "./tsconfig.json",
       "tsconfigRootDir": "."
     },
- "plugins": [
-      "plugin:@typescript-eslint/recommended",
-    ],
  "extends": [
       "plugin:@typescript-eslint/recommended",
-      "@react-native-community"
+      "@react-native-community",
+      'plugin:prettier/recommended',
     ],
-  "rules": {
-    "semi": "error"
-  }
 };

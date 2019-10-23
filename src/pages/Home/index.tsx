@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Modal, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {LineChart} from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
 import Tts from 'react-native-tts';
 import Voice from 'react-native-voice';
-import {BleManager} from 'react-native-ble-plx';
-import {Spinner, ActionSheet} from 'native-base';
+import {ActionSheet} from 'native-base';
+
 import Text from '../../components/Text';
+import Modal from '../../components/Modal';
 import {
   Container,
   HomeHeader,
@@ -17,19 +17,31 @@ import {
   Panel,
   Button,
   Row,
-  ModalContainer,
-  ModalBox,
 } from './styles';
-import {check} from '../../helpers/functions';
+import {check, connectToDevice} from '../../helpers/functions';
+import Toast from '../../Toast';
+import Commands from '../../helpers/commands';
 
-export default function Home() {
+export default function Home({navigation}:any) {
+
   const DEFAULT_COLOR = '#FA754C';
   const [isSearching, setSearch] = useState(true);
+  const [modalMsg, setMsg] = useState('Procurando Dispositivos');
+
   Voice.onSpeechStart = (e: any) => {
     console.log('OnSpeechStart: ', e);
   };
 
+  Voice.onSpeechResults = (e: any) => {
+    console.log('OnSpeechResults: ', e);
+    const command = Commands.filter(command => e.value.includes(command.command));
+    if (command.length > 0) {
+      Tts.speak(command[0].response);
+    }
+  }
+
   useEffect(() => {
+    Tts.setDefaultLanguage('pt-BR');
     check().then(data => {
       setSearch(false);
       ActionSheet.show(
@@ -39,7 +51,19 @@ export default function Home() {
           title: 'Dispositivos',
         },
         buttonIndex => {
-          console.log(buttonIndex);
+          setMsg("Conectando no dispositivo");
+          setSearch(true);
+          const id = data[buttonIndex].id;
+          if (!id) return null
+          return connectToDevice(id)
+            .then((value) => {
+              setSearch(false);
+              Toast.show(`Conectado ao dispositivo ${value.name}`, Toast.LONG);
+            })
+            .catch(error => {
+              setSearch(false);
+              Toast.show(`Falha ao conectar`, Toast.LONG);
+            });
         },
       );
     });
@@ -49,19 +73,12 @@ export default function Home() {
     <Container>
       <Modal
         animationType="slide"
+        isVisible={isSearching}
         transparent={true}
-        visible={isSearching}
-        onRequestClose={() => {
-          alert('Closing');
-        }}>
-        <ModalContainer>
-          <ModalBox>
-            <Text size={20} fontWeight="bold">
-              Procurando Dispositivos
-            </Text>
-            <Spinner />
-          </ModalBox>
-        </ModalContainer>
+        onRequestClose={() => alert("Close")}>
+        <Text size={20} fontWeight="bold">
+          {modalMsg}
+        </Text>
       </Modal>
       <HomeHeader>
         <Text>Hello</Text>
@@ -98,35 +115,44 @@ export default function Home() {
         <Row>
           <Button
             onPress={() => {
-              Tts.speak('Hello, World!');
+              Tts.speak('Ligando luz');
             }}>
             <Text color={DEFAULT_COLOR}>Luz</Text>
             <Icon name="wb-incandescent" size={28} color={DEFAULT_COLOR} />
           </Button>
           <Button
             onPress={() => {
-              console.log(Voice.start('pt-BR'));
+              Tts.speak('Ligando luz');
             }}>
             <Text color={DEFAULT_COLOR}>Ar</Text>
             <Icon name="computer" size={28} color={DEFAULT_COLOR} />
           </Button>
         </Row>
         <Row>
-          <Button>
+          <Button
+            onPress={() => {
+              navigation.navigate('Temperature');
+            }}>
             <Text color={DEFAULT_COLOR}>Temperatura</Text>
             <Icon name="wb-sunny" size={28} color={DEFAULT_COLOR} />
           </Button>
-          <Button>
+          <Button
+            onPress={() => {
+              Tts.speak('Ligando Ventilador');
+            }}>
             <Text color={DEFAULT_COLOR}>Ventilador</Text>
             <Icon name="toys" size={28} color={DEFAULT_COLOR} />
           </Button>
         </Row>
         <Row>
-          <Button>
+          <Button
+            onPress={() => {
+              console.log(Voice.start('pt-BR'));
+            }}>
             <Text color={DEFAULT_COLOR}>Voz</Text>
             <Icon name="mic" size={28} color={DEFAULT_COLOR} />
           </Button>
-          <Button>
+          <Button onPress={() => { navigation.navigate('Water') }}>
             <Text color={DEFAULT_COLOR}>Água</Text>
             <Icon name="public" size={28} color={DEFAULT_COLOR} />
           </Button>

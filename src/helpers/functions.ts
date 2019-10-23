@@ -1,19 +1,20 @@
 import BluetoothSerial, {
   withSubscription,
 } from 'react-native-bluetooth-serial-next';
+import { BackHandler } from 'react-native';
 
-const getDevices = async (): Promise<void> => {
+const getDevices = async (): Promise<any> => {
   const [devices, unpairedDevices] = await Promise.all([
     BluetoothSerial.list(),
     BluetoothSerial.listUnpaired(),
   ]);
-  console.log(unpairedDevices);
-  const devicesName = unpairedDevices.map(device => ({
+  const allDevices = [...devices, ...unpairedDevices];
+  const devicesName = allDevices.map(device => ({
     ...device,
-    text: device.name,
+    text: (device.name || "Desconhecido") + '\n' + device.id,
     icon: 'bluetooth',
   }));
-  devicesName.push('Cancelar');
+  devicesName.push({ text: 'Cancelar', icon: 'exit', id: '0' });
   return devicesName;
 };
 
@@ -24,10 +25,10 @@ const check = async (): Promise<any> => {
       return getDevices();
     } else {
       try {
-        const response = await BluetoothSerial.requestEnable();
+        await BluetoothSerial.requestEnable();
         return getDevices();
       } catch (e) {
-        console.log(false);
+        BackHandler.exitApp();
       }
     }
   } catch (e) {
@@ -35,4 +36,16 @@ const check = async (): Promise<any> => {
   }
 };
 
-export {check};
+const pairDevice = async(id: string): Promise<void> => {
+  console.log(id);
+  await BluetoothSerial.pairDevice(id);
+}
+
+const connectToDevice = async(id: string): Promise<any> => {
+  if (id !== '0')
+    return await BluetoothSerial.connect(id);
+  throw new Error("Cancelado");
+}
+
+export {check, pairDevice, connectToDevice};
+

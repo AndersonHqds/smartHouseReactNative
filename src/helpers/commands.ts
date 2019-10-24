@@ -1,27 +1,44 @@
 const commands = [
   {
-    command: "Ligar luz",
-    response: "Ligando luz"
+    command: 'Ligar luz',
+    response: 'Ligando luz',
+    arduinoCmd: 'light',
+    type: null,
   },
   {
-    command: "Ligar ar",
-    response: "Ligando ar"
+    command: 'Desligar luz',
+    response: 'Desligando luz',
+    arduinoCmd: 'light',
+    type: null,
   },
   {
-    command: "Qual a temperatura",
-    response: "A temperatura é "
+    command: 'Ligar ar',
+    response: 'Ligando ar',
+    arduinoCmd: 'fan',
+    type: null,
   },
   {
-    command: "Ligar ventilador",
-    response: "Ligando ventilador"
+    command: 'Qual a temperatura',
+    response: 'A temperatura é ',
+    arduinoCmd: null,
+    type: 'temperature',
   },
   {
-    command: "Qual o nível de água",
-    response: "O nível de água é "
+    command: 'Ligar ventilador',
+    response: 'Ligando ventilador',
+    arduinoCmd: 'fan',
+    type: null,
   },
   {
-    command: "Qual o melhor sistema",
-    response: "Óbvio que é linux"
-  }
+    command: 'Qual o nível de água',
+    response: 'O nível de água está em ',
+    type: 'water',
+  },
+  {
+    command: 'Qual o melhor sistema',
+    response: 'Óbvio que é linux',
+    arduinoCmd: null,
+    type: null,
+  },
 ];
 export default commands;

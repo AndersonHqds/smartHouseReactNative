@@ -5,4 +5,3 @@ export const Container = styled.View`
   flex: 1;
   background: #f7f9fa;
 `;
-

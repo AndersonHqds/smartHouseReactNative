@@ -14,4 +14,9 @@ module.exports = {
       "@react-native-community",
       'plugin:prettier/recommended',
     ],
+  "rules": {
+    "react-native/no-inline-styles": "off",
+    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/no-explicit-any": "off"
+  }
 };

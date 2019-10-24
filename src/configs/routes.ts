@@ -15,13 +15,14 @@ const Routes = createAppContainer(
         screen: Temperature,
       },
       Water: {
-        screen: Water
-      }
+        screen: Water,
+      },
     },
     {
       headerMode: 'none',
       initialRouteName: 'Home',
-    }),
+    },
+  ),
 );
 
 export default Routes;

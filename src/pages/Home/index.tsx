@@ -18,27 +18,66 @@ import {
   Button,
   Row,
 } from './styles';
-import {check, connectToDevice} from '../../helpers/functions';
+import {check, connectToDevice, sendData} from '../../helpers/functions';
 import Toast from '../../Toast';
 import Commands from '../../helpers/commands';
 
-export default function Home({navigation}:any) {
+interface Props {
+  navigation: any;
+}
 
+const Home: React.FC<Props> = ({navigation}) => {
   const DEFAULT_COLOR = '#FA754C';
   const [isSearching, setSearch] = useState(true);
+  const [temperature, setTemperature] = useState(0);
+  const [humidity, setHumidity] = useState([0, 20, 25, 15, 20, 55, 60]);
+
   const [modalMsg, setMsg] = useState('Procurando Dispositivos');
 
-  Voice.onSpeechStart = (e: any) => {
-    console.log('OnSpeechStart: ', e);
+  Voice.onSpeechResults = (e: any): void => {
+    e = e.value.map((value: string) => value.toLowerCase());
+    const command = Commands.filter(arduinoCommand =>
+      e.includes(arduinoCommand.command.toLowerCase()),
+    );
+    if (command.length > 0) {
+      console.log(command[0]);
+      if (command[0].arduinoCmd) {
+        Tts.speak(command[0].response);
+        sendData(command[0].arduinoCmd);
+      } else {
+        if (command[0].type) {
+          if (command[0].type === 'temperature') {
+            const realTemperature = temperature.toString().split(',')[0];
+            Tts.speak(command[0].response + realTemperature + ' graus');
+          }
+          if (command[0].type === 'water') {
+            Tts.speak(command[0].response + '50 por cento');
+          }
+        } else {
+          Tts.speak(command[0].response);
+        }
+      }
+    }
   };
 
-  Voice.onSpeechResults = (e: any) => {
-    console.log('OnSpeechResults: ', e);
-    const command = Commands.filter(command => e.value.includes(command.command));
-    if (command.length > 0) {
-      Tts.speak(command[0].response);
+  useEffect(() => {
+    if (temperature.toString().split(',').length === 2) {
+      const sensorHumidity = temperature
+        .toString()
+        .split(',')[1]
+        .trim();
+      const humidityHelper = [...humidity];
+      if (Number(humidityHelper.slice(-1)[0]) !== Number(sensorHumidity)) {
+        humidityHelper.push(Number(sensorHumidity));
+        setHumidity(
+          humidityHelper.slice(
+            humidityHelper.length - 7,
+            humidityHelper.length,
+          ),
+        );
+      }
     }
-  }
+  }, [humidity, temperature]);
 
   useEffect(() => {
     Tts.setDefaultLanguage('pt-BR');
@@ -51,16 +90,16 @@ export default function Home({navigation}:any) {
           title: 'Dispositivos',
         },
         buttonIndex => {
-          setMsg("Conectando no dispositivo");
+          setMsg('Conectando no dispositivo');
           setSearch(true);
           const id = data[buttonIndex].id;
-          if (!id) return null
-          return connectToDevice(id)
-            .then((value) => {
+          if (!id) return null;
+          return connectToDevice(id, setTemperature)
+            .then(value => {
               setSearch(false);
               Toast.show(`Conectado ao dispositivo ${value.name}`, Toast.LONG);
             })
-            .catch(error => {
+            .catch(() => {
               setSearch(false);
               Toast.show(`Falha ao conectar`, Toast.LONG);
             });
@@ -75,7 +114,7 @@ export default function Home({navigation}:any) {
         animationType="slide"
         isVisible={isSearching}
         transparent={true}
-        onRequestClose={() => alert("Close")}>
+        onRequestClose={(): void => {}}>
         <Text size={20} fontWeight="bold">
           {modalMsg}
         </Text>
@@ -93,7 +132,10 @@ export default function Home({navigation}:any) {
             size={90}
             color="#000"
             family="Montserrat-SemiBold">
-            34
+            {temperature
+              .toString()
+              .split(',')[0]
+              .trim()}
           </Text>
           <Text size={25} paddingTop={30} weight="bold" color="#000">
             °C
@@ -104,7 +146,7 @@ export default function Home({navigation}:any) {
           <LineChart
             yMax={100}
             yMin={0}
-            data={[0, 20, 25, 15, 20, 55, 60]}
+            data={humidity}
             style={{flex: 1}}
             curve={shape.curveNatural}
             svg={{stroke: '#FA754C', strokeWidth: 3}}
@@ -113,46 +155,40 @@ export default function Home({navigation}:any) {
       </TemperatureContainer>
       <Panel>
         <Row>
-          <Button
-            onPress={() => {
-              Tts.speak('Ligando luz');
-            }}>
+          <Button onPress={(): Promise<void> => sendData('light')}>
             <Text color={DEFAULT_COLOR}>Luz</Text>
             <Icon name="wb-incandescent" size={28} color={DEFAULT_COLOR} />
           </Button>
-          <Button
-            onPress={() => {
-              Tts.speak('Ligando luz');
-            }}>
+          <Button onPress={(): Promise<void> => sendData('fan')}>
             <Text color={DEFAULT_COLOR}>Ar</Text>
             <Icon name="computer" size={28} color={DEFAULT_COLOR} />
           </Button>
         </Row>
         <Row>
           <Button
-            onPress={() => {
+            onPress={(): void => {
               navigation.navigate('Temperature');
             }}>
             <Text color={DEFAULT_COLOR}>Temperatura</Text>
             <Icon name="wb-sunny" size={28} color={DEFAULT_COLOR} />
           </Button>
-          <Button
-            onPress={() => {
-              Tts.speak('Ligando Ventilador');
-            }}>
+          <Button onPress={(): Promise<void> => sendData('fan')}>
             <Text color={DEFAULT_COLOR}>Ventilador</Text>
             <Icon name="toys" size={28} color={DEFAULT_COLOR} />
           </Button>
         </Row>
         <Row>
           <Button
-            onPress={() => {
+            onPress={(): void => {
               console.log(Voice.start('pt-BR'));
             }}>
             <Text color={DEFAULT_COLOR}>Voz</Text>
             <Icon name="mic" size={28} color={DEFAULT_COLOR} />
           </Button>
-          <Button onPress={() => { navigation.navigate('Water') }}>
+          <Button
+            onPress={(): void => {
+              navigation.navigate('Water');
+            }}>
             <Text color={DEFAULT_COLOR}>Água</Text>
             <Icon name="public" size={28} color={DEFAULT_COLOR} />
           </Button>
@@ -160,8 +196,6 @@ export default function Home({navigation}:any) {
       </Panel>
     </Container>
   );
-}
-
-Home.navigationOptions = {
-  title: 'Home',
 };
+
+export default Home;

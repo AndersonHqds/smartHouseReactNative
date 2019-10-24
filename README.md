@@ -17,11 +17,11 @@
 ## App aparence
 
 * Main Screen
-  * ![Main Screen](/gitassets/main_screen.png )
+  * ![Main Screen](/gitassets/main_screen.png | width=48)
 * Temperature Screen
-  * ![Temperature Screen](/gitassets/temperature_screen.png)
+  * ![Temperature Screen](/gitassets/temperature_screen.png | width=48)
 * Schema
-  * ![Schema](/gitassets/schema.jpg)
+  * ![Schema](/gitassets/schema.jpg | width=48)
 
 ## Arduino Ports
 

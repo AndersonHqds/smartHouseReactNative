@@ -48,6 +48,20 @@ Open the terminal and go to **projectFolder**, after run the following commands.
 * Run the project
   * `$ react-native run-android`
 
+### Voice commands
+Currenctly the **voice** commands just works in **pt-BR**.
+
+| Functionality | Voice command |
+| ------ | ------ |
+| Light | **Turn on** - You need to say **Ligar luz**, **Turn off** - You need to say **Desligar luz** |
+| FAN | You need to say **Ligar ventilador** |
+| Temperature | Just say **Qual a temperatura?** |
+
+### TODO
+
+- [ ] Finish the water level screen
+- [ ] Implement internacionalization
+- [ ] Add english voice commands
 
 
 

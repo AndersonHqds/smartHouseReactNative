@@ -36,13 +36,6 @@ export const Panel = styled.View`
   padding: 10px;
 `;
 
-export const Row = styled.View`
-  flex: 1;
-  flex-direction: row;
-  justify-content: space-around;
-  padding: 10px;
-`;
-
 export const Button = styled.TouchableOpacity`
   border: 1px;
   border-color: #fa754c;

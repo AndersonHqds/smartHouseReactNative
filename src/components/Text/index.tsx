@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text} from 'react-native';
+import {Text} from 'native-base';
 
 export interface Props {
   family?: any;
@@ -11,7 +11,7 @@ export interface Props {
   children: string;
 }
 
-const Typography: React.FC<Props> = props => {
+const TextComponent: React.FC<Props> = props => {
   return (
     <Text
       style={{
@@ -26,4 +26,4 @@ const Typography: React.FC<Props> = props => {
   );
 };
 
-export default Typography;
+export default TextComponent;

@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {LineChart} from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
 import Tts from 'react-native-tts';
 import Voice from 'react-native-voice';
 import {ActionSheet} from 'native-base';
+import { NavigationScreenProp } from 'react-navigation';
 
 import Text from '../../components/Text';
 import Modal from '../../components/Modal';
@@ -13,21 +13,18 @@ import {
   HomeHeader,
   TemperatureContainer,
   Temperature,
-  Chart,
-  Panel,
-  Button,
-  Row,
+  Chart
 } from './styles';
 import {check, connectToDevice, sendData} from '../../helpers/functions';
 import Toast from '../../Toast';
+import Panel from '../../components/Panel';
 import Commands from '../../helpers/commands';
 
 interface Props {
-  navigation: any;
+  navigation: NavigationScreenProp<any, any>;
 }
 
 const Home: React.FC<Props> = ({navigation}) => {
-  const DEFAULT_COLOR = '#FA754C';
   const [isSearching, setSearch] = useState(true);
   const [temperature, setTemperature] = useState(0);
   const [humidity, setHumidity] = useState([0, 20, 25, 15, 20, 55, 60]);
@@ -40,7 +37,6 @@ const Home: React.FC<Props> = ({navigation}) => {
       e.includes(arduinoCommand.command.toLowerCase()),
     );
     if (command.length > 0) {
-      console.log(command[0]);
       if (command[0].arduinoCmd) {
         Tts.speak(command[0].response);
         sendData(command[0].arduinoCmd);
@@ -153,47 +149,9 @@ const Home: React.FC<Props> = ({navigation}) => {
           />
         </Chart>
       </TemperatureContainer>
-      <Panel>
-        <Row>
-          <Button onPress={(): Promise<void> => sendData('light')}>
-            <Text color={DEFAULT_COLOR}>Luz</Text>
-            <Icon name="wb-incandescent" size={28} color={DEFAULT_COLOR} />
-          </Button>
-          <Button onPress={(): Promise<void> => sendData('fan')}>
-            <Text color={DEFAULT_COLOR}>Ar</Text>
-            <Icon name="computer" size={28} color={DEFAULT_COLOR} />
-          </Button>
-        </Row>
-        <Row>
-          <Button
-            onPress={(): void => {
-              navigation.navigate('Temperature');
-            }}>
-            <Text color={DEFAULT_COLOR}>Temperatura</Text>
-            <Icon name="wb-sunny" size={28} color={DEFAULT_COLOR} />
-          </Button>
-          <Button onPress={(): Promise<void> => sendData('fan')}>
-            <Text color={DEFAULT_COLOR}>Ventilador</Text>
-            <Icon name="toys" size={28} color={DEFAULT_COLOR} />
-          </Button>
-        </Row>
-        <Row>
-          <Button
-            onPress={(): void => {
-              console.log(Voice.start('pt-BR'));
-            }}>
-            <Text color={DEFAULT_COLOR}>Voz</Text>
-            <Icon name="mic" size={28} color={DEFAULT_COLOR} />
-          </Button>
-          <Button
-            onPress={(): void => {
-              navigation.navigate('Water');
-            }}>
-            <Text color={DEFAULT_COLOR}>Água</Text>
-            <Icon name="public" size={28} color={DEFAULT_COLOR} />
-          </Button>
-        </Row>
-      </Panel>
+      <Panel
+        navigation={navigation}
+        onVoiceButtonPress={() => Voice.start('pt-BR')}/>
     </Container>
   );
 };
